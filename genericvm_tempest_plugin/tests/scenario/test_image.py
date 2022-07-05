@@ -46,6 +46,14 @@ class GenericvmTestScenario(manager.ScenarioTest):
 
     def test_minimum_image_validity_scenario(self):
         keypair = self.create_keypair()
+        kernel_modules = CONF.genericvm.kenrel_mod
+        pci_devices = CONF.genericvm.get('pci_devices', [])
+        if CONF.service_available.get('nvgrid', False):
+            kernel_modules.extend(['nvidia', 'nvidia_drm'])
+            pci_devices.extend(["3D controller"])
+            check_nv_sni = True
+        else:
+            check_nv_sni = CONF.genericvm.check_nv_sni
         create_args = {
             'name': 'genericvm_test',
             'image_id': CONF.genericvm.get('image_id',
@@ -76,11 +84,26 @@ class GenericvmTestScenario(manager.ScenarioTest):
         filesystem_size = self.linux_client.exec_command(
             "df | grep '/dev/sda1' | awk '{ print $2 }'")
         self.assertTrue(CONF.genericvm.fs_size < int(filesystem_size))
+
         lsof_run = self.linux_client.exec_command("lsmod")
         the_modules = [mod.split()[0]
                        for mod in lsof_run.split("\n")[1:] if mod]
         mod_assert_text = "module {} is missing! Available modules are:\n{}"
-        for module in CONF.genericvm.kenrel_mod:
+        for module in kernel_modules:
             self.assertTrue(module in the_modules,
                             mod_assert_text.format(module, the_modules))
 
+        lspci_run = self.linux_client.exec_command("lspci -m")
+        found_pci_devices = []
+        for device in lspci_run.split('\n'):
+            try:
+                found_pci_devices.append(device.split('"')[1])
+            except IndexError:
+                pass
+        for dev_class in pci_devices:
+            self.assertIn(dev_class, found_pci_devices,
+                          message='Required PCI device is not available')
+
+        if check_nv_sni:
+            # Rises exception if the exit code is not 0. When no vide card.
+            self.linux_client.exec_command("nvidia-smi -L")

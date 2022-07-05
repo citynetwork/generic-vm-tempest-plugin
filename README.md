@@ -25,13 +25,21 @@ If omitted used globally defined username.
 * with_volume - whether to create volume-based server or
 not.
 * check_getpass - whether to look for getpass binary.
+* pci_devices - comma separated list of pci devices classes
+which must present in virtual machine. For example 
+"3D controller" or "SCSI storage controller". Double quotas
+are required to be present.
+* check_nv_sni - boolean, defines whether to try nvidia
+drivers and check video card availability.
 
-Additionaly we can set nvgrid service in service_available 
-section. This will add a verification for the nvidia grid
-hardware. Available pci devices, necessary host records,
-additional kernel modules.
-
-* nvgrid - Bool. Default to true
+Additionally, it is possible to set nvgrid service in service_available section.
+This will add a verification for the nvidia grid hardware. Available pci
+devices, necessary host records, additional kernel modules. It is equivalent to
+the following options list:
+* check_nv_sni: True
+* pci_devices: "3D controller"
+* kenrel_mod: kenrel_mod,nvidia_drm
+Values of pci_devices and kernel_mod would be appended to the list from config.
 
 Running the tests
 ---------------
