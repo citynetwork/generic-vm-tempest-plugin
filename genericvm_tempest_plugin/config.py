@@ -36,7 +36,8 @@ GenericvmGroup = [
     cfg.StrOpt('image_id', help='An image to use'),
     cfg.BoolOpt('check_getpass', default=False,
                 help='Do we need to look for getpass binary?'),
-    cfg.ListOpt('pci_devices', help='expected list of pci devices classes.'),
+    cfg.ListOpt('pci_devices', default=[],
+                help='expected list of pci devices classes.'),
     cfg.BoolOpt('check_nv_sni', default=False,
                 help='query nvidia-sni for the vide card and driver presence'),
 ]

@@ -19,12 +19,6 @@ class GenericvmTestScenario(manager.ScenarioTest):
     """
     credentials = ['primary']
 
-    @classmethod
-    def _check_service(cls, name):
-        if not getattr(CONF.service_available, name, False):
-            raise cls.skipException("%s support is required" %
-                                    name.capitalize())
-    
     def create_and_add_security_group_to_server(self, server):
         secgroup = self.create_security_group()
         self.servers_client.add_security_group(server['id'],
@@ -61,7 +55,8 @@ class GenericvmTestScenario(manager.ScenarioTest):
             'key_name': keypair['name'],
             'validatable': False,
             'volume_backed': CONF.genericvm.with_volume,
-            'flavor': CONF.genericvm.get('flavor', CONF.compute.get('flavor'))}
+            'flavor': CONF.genericvm.get(
+                'flavor', CONF.compute.get('flavor_ref'))}
 
         server = self.create_server(**create_args)
         servers = self.servers_client.list_servers()['servers']
