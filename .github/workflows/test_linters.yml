@@ -1,10 +1,4 @@
 ---
-name: test-linters 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -27,5 +21,9 @@ jobs:
           - '3.9'
           - '3.10'
 
-
-
+name: test-linters
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [ 'main' ]
+  push:
+    branches: [ '!main' ]
