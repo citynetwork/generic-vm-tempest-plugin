@@ -13,7 +13,7 @@ jobs:
         run: |
           pip install tox tox-gh-actions
       - name: Test linters
-        run: tox -e gitlint,yamllint,pep8
+        run: tox -e yamllint,pep8
     strategy:
       matrix:
         python-version:
