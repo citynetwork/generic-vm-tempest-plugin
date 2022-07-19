@@ -16,7 +16,7 @@ Config options
 Optional variables are set in genericvm group:
 * fs_size - expected size for the vm filesystem. T check
 growpart and allocated volume. Define size in bytes.
-* kenrel_mod - defines a list of kernel modules required
+* kernel_mod - defines a list of kernel modules required
 to be present. Use period to separate values. lsmod used
 * flavor - desired flavor to use during the image testing
 If omitted global image_ref is used.
@@ -38,7 +38,7 @@ devices, necessary host records, additional kernel modules. It is equivalent to
 the following options list:
 * check_nv_sni: True
 * pci_devices: "3D controller"
-* kenrel_mod: kenrel_mod,nvidia_drm
+* kernel_mod: kernel_mod,nvidia_drm
 Values of pci_devices and kernel_mod would be appended to the list from config.
 
 Running the tests

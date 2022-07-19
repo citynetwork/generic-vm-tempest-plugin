@@ -1,4 +1,7 @@
 """
+Genericvm tempest plugin
+Copyright 2022 City Network International AB
+
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this file except in compliance with the License. You may obtain
 a copy of the License at
@@ -36,13 +39,15 @@ class GenericvmTestScenario(manager.ScenarioTest):
     credentials = ['primary']
 
     def create_and_add_security_group_to_server(self, server):
-        """
+        """function that creates and assign a security group
 
         Creates a security group which allows to make a connection.
         Assign it to the server provided. This is necessary to let
         testing script login to the server using ssh.
 
+        :type server: openstack.compute.v2.server.Server
         :param server: id of the server to assign security group to.
+
         :return: void
         """
         secgroup = self.create_security_group()
@@ -73,7 +78,7 @@ class GenericvmTestScenario(manager.ScenarioTest):
         """
 
         keypair = self.create_keypair()
-        kernel_modules = CONF.genericvm.kenrel_mod
+        kernel_modules = CONF.genericvm.kernel_mod
         pci_devices = CONF.genericvm.get('pci_devices', [])
         if CONF.service_available.get('nvgrid', False):
             kernel_modules.extend(['nvidia', 'nvidia_drm'])

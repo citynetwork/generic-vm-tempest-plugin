@@ -1,6 +1,6 @@
 """
-Copyright 2015
-All Rights Reserved.
+Genericvm tempest plugin
+Copyright 2022 City Network International AB
 
    Licensed under the Apache License, Version 2.0 (the "License"); you may
    not use this file except in compliance with the License. You may obtain
@@ -29,7 +29,7 @@ genericvm_group = cfg.OptGroup(
 GenericvmGroup = [
     cfg.IntOpt("fs_size", default=45000000,
                help="Expected filesystem size should be more than..."),
-    cfg.ListOpt('kenrel_mod', default=['virtio_net', 'virtio_scsi'],
+    cfg.ListOpt('kernel_mod', default=['virtio_net', 'virtio_scsi'],
                 help="Expected list of loaded kernel modules"),
     cfg.StrOpt('flavor', help="Flavor to use for the image creation"),
     cfg.BoolOpt('with_volume', default=True,
