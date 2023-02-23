@@ -190,4 +190,4 @@ class GenericvmTestScenario(manager.ScenarioTest):
 
         if check_nv_sni:
             # Rises exception if the exit code is not 0. When no vide card.
-            self.linux_client.exec_command("nvidia-smi -L")
+            linux_client.exec_command("nvidia-smi -L")
