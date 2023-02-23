@@ -16,6 +16,7 @@ under the License.
 """
 
 from tempest import config
+from tempest.common import waiters
 from tempest.lib import exceptions
 from tempest.lib.common.utils import test_utils
 from tempest.scenario import manager
@@ -72,6 +73,48 @@ class GenericvmTestScenario(manager.ScenarioTest):
             {secgroup['id']} to the server {server['id']}")
             raise exceptions.TimeoutException(msg)
 
+    def get_port_id(self, ip_address):
+        """
+        Get port id without os_admin. os_primary is used instead
+        """
+        port_client = self.os_primary.ports_client
+        # floating_client = self.os_primary.floating_ips_client
+        available_ports = port_client.list_ports()
+        # import epdb; epdb.serve()
+        for port in available_ports['ports']:
+            for fixed_ip in port['fixed_ips']:
+                if fixed_ip['ip_address'] == ip_address:
+                    return port['id']
+        return None
+
+    def create_floating_ip(self, server):
+        """
+        Non admin floating IP creation
+        """
+        floating_client = self.os_primary.floating_ips_client
+        ip4 = self.get_ip_address(server)
+        port_id = self.get_port_id(ip4)
+        # import epdb; epdb.serve()
+        external_network_id = CONF.network.public_network_id
+        floatingip_kwargs = {
+            'floating_network_id': external_network_id,
+            'port_id': port_id,
+            'tenant_id': server.get('project_id') or server['tenant_id'],
+            'fixed_ip_address': ip4}
+        result = floating_client.create_floatingip(**floatingip_kwargs)
+        floating_ip = result['floatingip']
+        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
+                        floating_client.delete_floatingip,
+                        floating_ip['id'])
+        return floating_ip
+
+    def get_ip_address(self, server):
+        addresses = server['addresses'][
+            CONF.compute.fixed_network_name]
+        for address in addresses:
+            return address['addr']
+        raise exceptions.ServerUnreachable(server_id=server['id'])
+
     def test_minimum_image_validity_scenario(self):
         """
         Main image test case.
@@ -100,7 +143,15 @@ class GenericvmTestScenario(manager.ScenarioTest):
         servers = self.servers_client.list_servers()['servers']
         self.assertIn(server['id'], [x['id'] for x in servers])
 
-        ssh_ip = self.get_server_ip(server)
+        if (CONF.network_feature_enabled.floating_ips and
+                CONF.network.floating_network_name):
+            floating_ip = self.create_floating_ip(server)
+            waiters.wait_for_server_floating_ip(
+                self.servers_client, server, floating_ip)
+            ssh_ip = floating_ip['floating_ip_address']
+        else:
+            ssh_ip = self.get_server_ip(server)
+
         self.create_and_add_security_group_to_server(server)
         linux_client = self.get_remote_client(
             ssh_ip,
@@ -139,4 +190,4 @@ class GenericvmTestScenario(manager.ScenarioTest):
 
         if check_nv_sni:
             # Rises exception if the exit code is not 0. When no vide card.
-            self.linux_client.exec_command("nvidia-smi -L")
+            linux_client.exec_command("nvidia-smi -L")
