@@ -177,16 +177,17 @@ class GenericvmTestScenario(manager.ScenarioTest):
             self.assertTrue(module in the_modules,
                             mod_assert_text.format(module, the_modules))
 
-        lspci_run = linux_client.exec_command("lspci -m")
-        found_pci_devices = []
-        for device in lspci_run.split('\n'):
-            try:
-                found_pci_devices.append(device.split('"')[1])
-            except IndexError:
-                pass
-        for dev_class in pci_devices:
-            self.assertIn(dev_class, found_pci_devices,
-                          message='Required PCI device is not available')
+        if len(pci_devices) > 0:
+            lspci_run = linux_client.exec_command("lspci -m")
+            found_pci_devices = []
+            for device in lspci_run.split('\n'):
+                try:
+                    found_pci_devices.append(device.split('"')[1])
+                except IndexError:
+                    pass
+            for dev_class in pci_devices:
+                self.assertIn(dev_class, found_pci_devices,
+                            message='Required PCI device is not available')
 
         if check_nv_sni:
             # Rises exception if the exit code is not 0. When no vide card.
