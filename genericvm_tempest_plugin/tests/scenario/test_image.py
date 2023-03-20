@@ -187,7 +187,7 @@ class GenericvmTestScenario(manager.ScenarioTest):
                     pass
             for dev_class in pci_devices:
                 self.assertIn(dev_class, found_pci_devices,
-                            message='Required PCI device is not available')
+                              message='Required PCI device is not available')
 
         if check_nv_sni:
             # Rises exception if the exit code is not 0. When no vide card.
