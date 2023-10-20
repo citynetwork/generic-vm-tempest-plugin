@@ -166,7 +166,7 @@ class GenericvmTestScenario(manager.ScenarioTest):
                 "test -f /etc/cloud/getpass.sh && echo 1")
             self.assertEqual(1, int(getpass_present), msg)
         filesystem_size = linux_client.exec_command(
-            "df | grep '/dev/sda1' | awk '{ print $2 }'")
+            "df / | awk '{ print $2 }' | tail -n1")
         self.assertTrue(CONF.genericvm.fs_size < int(filesystem_size))
 
         lsof_run = linux_client.exec_command("lsmod")
