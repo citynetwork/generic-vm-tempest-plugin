@@ -39,6 +39,16 @@ class GenericvmTestScenario(manager.ScenarioTest):
     """
     credentials = ['primary']
 
+    @staticmethod
+    def _get_kernel_modinfo(client, modules):
+        for module in modules:
+            try:
+                result = client.exec_command(f"modinfo {module}")
+            except exceptions.SSHExecCommandFailed:
+                result = None
+            if result:
+                yield module
+
     def create_and_add_security_group_to_server(self, server):
         """function that creates and assign a security group
 
@@ -169,9 +179,10 @@ class GenericvmTestScenario(manager.ScenarioTest):
             "df / | awk '{ print $2 }' | tail -n1")
         self.assertTrue(CONF.genericvm.fs_size < int(filesystem_size))
 
-        lsof_run = linux_client.exec_command("lsmod")
-        the_modules = [mod.split()[0]
-                       for mod in lsof_run.split("\n")[1:] if mod]
+        the_modules = [
+            mod
+            for mod in self._get_kernel_modinfo(linux_client, kernel_modules)
+        ]
         mod_assert_text = "module {} is missing! Available modules are:\n{}"
         for module in kernel_modules:
             self.assertTrue(module in the_modules,
