@@ -167,7 +167,13 @@ class GenericvmTestScenario(manager.ScenarioTest):
             self.assertEqual(1, int(getpass_present), msg)
         filesystem_size = linux_client.exec_command(
             "df / | awk '{ print $2 }' | tail -n1")
-        self.assertTrue(CONF.genericvm.fs_size < int(filesystem_size))
+        fs_assert_text = f"""
+            Actual filesize ({filesystem_size}) is lower then expected
+            one ({CONF.genericvm.fs_size})
+        """
+        self.assertTrue(
+            CONF.genericvm.fs_size < int(filesystem_size), fs_assert_text
+        )
 
         lsof_run = linux_client.exec_command("lsmod")
         the_modules = [mod.split()[0]
